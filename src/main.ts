@@ -1,115 +1,18 @@
-import { BaseItem } from "./items/BaseItem";
-import { Cube } from "./items/Cube";
-import { WorldSettings } from "./world/WorldSettings";
-import "./style.css";
-import { ImmovableBox } from "./items/ImmovableBox";
+import { Bodies, Composite } from "matter-js";
+import { Physics } from "./Physics";
+import { Mouse } from "./interaction/Mouse";
 
-const canvas = document.getElementById('myCanvas') as HTMLCanvasElement;
+document.body.style.margin = "0";
+document.body.style.overflow = "hidden";
 
-let items: BaseItem[] = [];
+Physics.initialize();
 
-window.addEventListener('mousedown', handleClick);
+const boxA = Bodies.rectangle(400, 200, 80, 80);
+const boxB = Bodies.rectangle(450, 50, 80, 80);
+const trapezoid = Bodies.polygon(400, 400, 5, 80);
 
-const buttons = {
-  left: 0,
-  middle: 1,
-  right: 2,
-  back: 3,
-  forward: 4
-};
+Composite.add(Physics.engine.world, [boxA, boxB, trapezoid]);
 
-function handleClick(event: MouseEvent) {
-  if (event.button === buttons.left) {
-    // drag item
-  } else if (event.button === buttons.right) {
-    createItem(event);
-  }
-}
-window.addEventListener('contextmenu', handleContextMenu);
+Mouse.initialize();
 
-function handleContextMenu(event: MouseEvent) {
-  event.preventDefault(); // Prevent the default right-click behavior
-}
-
-
-function createItem(event: MouseEvent) {
-  const x = event.clientX;
-  const y = event.clientY;
-  const color = `rgb(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255})`;
-  const xVel = Math.random() * 2 - 1;
-  const yVel = Math.random() * 2 - 1;
-  const item = new Cube({initialX: x, initialY: y, color, initialXVel: xVel, initialYVel: yVel});
-  items.push(item);
-}
-
-function resizeCanvas() {
-  const displayWidth  = window.innerWidth;
-  const displayHeight = window.innerHeight;
-
-  // Check if the canvas is not the same size.
-  if (canvas.width != displayWidth ||
-      canvas.height != displayHeight) {
-
-    // Make the canvas the same size
-    canvas.width  = displayWidth;
-    canvas.height = displayHeight;
-  }
-}
-
-window.onload = resizeCanvas;
-window.onresize = resizeCanvas;
-
-let start: number, previousTimeStamp: number;
-let totalTime = 0;
-let frame = 0;
-let worldSettings: WorldSettings = {
-  gravity: 0.001,
-  gravityType: 'down',
-  scale: 0.25
-};
-
-const step: FrameRequestCallback = (timestamp: number) => {
-  frame++;
-  if (!start) start = timestamp;
-  if (!previousTimeStamp) previousTimeStamp = timestamp;
-  totalTime = timestamp - start;
-  const frameTime = timestamp - previousTimeStamp;
-  handleCalculations(frameTime);
-  previousTimeStamp = timestamp;
-  requestAnimationFrame(step);
-}
-
-
-function resetCanvas(ctx: CanvasRenderingContext2D) {
-  ctx.fillStyle = 'black';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-}
-
-function fadeCanvas(ctx: CanvasRenderingContext2D) {
-  ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-}
-
-function handleCalculations(frameTime: number) {
-  const ctx: CanvasRenderingContext2D = canvas.getContext('2d')!;
-  resetCanvas(ctx);
-  // fadeCanvas(ctx);
-  for (let i = 0; i < items.length; i++) {
-    const item = items[i];
-    if (item.offScreen) {
-      items.splice(i, 1);
-      i--;
-      console.log('deleted');
-      continue;
-    }
-    item.update(frameTime, worldSettings);
-    item.draw(ctx);
-  }
-}
-
-
-
-
-
-
-requestAnimationFrame(step);
+// Physics.setGravity(0, 1);
