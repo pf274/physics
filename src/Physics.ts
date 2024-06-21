@@ -23,10 +23,10 @@ export class Physics {
 	private static isEventListenerAdded = false;
 	private static _isRendering = false;
 	private static _isRunning = false;
-	public static leftBound = Bodies.rectangle(5, this._height / 2, 10, screenHeight, { isStatic: true, render: { visible: false } });
-	public static rightBound = Bodies.rectangle(this._width - 5, this._height / 2, 10, screenHeight, { isStatic: true, render: { visible: false } });
-	public static bottomBound = Bodies.rectangle(this._width / 2, this._height - 10, screenWidth, 20, { isStatic: true, render: { visible: true } });
-	public static topBound = Bodies.rectangle(this._width / 2, 5, screenWidth, 10, { isStatic: true, render: { visible: false } });
+	public static leftBound = Bodies.rectangle(5, this._height / 2, 10, Math.max(screenWidth, screenHeight), { isStatic: true, render: { visible: false } });
+	public static rightBound = Bodies.rectangle(this._width - 5, this._height / 2, 10, Math.max(screenWidth, screenHeight), { isStatic: true, render: { visible: false } });
+	public static bottomBound = Bodies.rectangle(this._width / 2, this._height - 10, Math.max(screenWidth, screenHeight), 20, { isStatic: true, render: { visible: true } });
+	public static topBound = Bodies.rectangle(this._width / 2, 5, Math.max(screenWidth, screenHeight), 10, { isStatic: true, render: { visible: false } });
 	public static bodies: Record<string, BodyClass[]> = { rolyPoly: [] };
 
 	public static initialize() {
@@ -53,6 +53,11 @@ export class Physics {
 		}
 		if (!this.isEventListenerAdded) {
 			window.addEventListener("resize", () => {
+				resizeWorld();
+				this._width = window.innerWidth;
+				this._height = window.innerHeight;
+			});
+			window.addEventListener("orientationchange", () => {
 				resizeWorld();
 				this._width = window.innerWidth;
 				this._height = window.innerHeight;
@@ -185,24 +190,28 @@ export class Physics {
 	private static handleTick(event: IEvent<Engine>) {}
 
 	private static handleSounds(event: any) {
-		const bodyA = event.pairs[0].bodyA;
-		const bodyB = event.pairs[0].bodyB;
-		const bodyAClass = Physics.bodies[bodyA.label]?.find((body) => body.body === bodyA);
-		const bodyBClass = Physics.bodies[bodyB.label]?.find((body) => body.body === bodyB);
-		const volumeA = Math.max(0, Math.min(1, (bodyA.velocity.x + bodyA.velocity.y) / 20));
-		const volumeB = Math.max(0, Math.min(1, (bodyB.velocity.x + bodyB.velocity.y) / 20));
-		const labelsToCheck = ["basketball", "crate", "tennisBall"];
-		for (const label of labelsToCheck) {
-			if (bodyA.label == label || bodyB.label == label) {
-				const body = bodyA.label == label ? bodyAClass : bodyBClass;
-				const volume = bodyA.label == label ? volumeA : volumeB;
-				if (volume > 0.03) {
-					const randomIndex = Math.floor(Math.random() * body?.sounds.length!);
-					const audio = new Audio((body as BodyClass).sounds[randomIndex]);
-					audio.volume = volume;
-					audio.play();
+		try {
+			const bodyA = event.pairs[0].bodyA;
+			const bodyB = event.pairs[0].bodyB;
+			const bodyAClass = Physics.bodies[bodyA.label]?.find((body) => body.body === bodyA);
+			const bodyBClass = Physics.bodies[bodyB.label]?.find((body) => body.body === bodyB);
+			const volumeA = Math.max(0, Math.min(1, (bodyA.velocity.x + bodyA.velocity.y) / 20));
+			const volumeB = Math.max(0, Math.min(1, (bodyB.velocity.x + bodyB.velocity.y) / 20));
+			const labelsToCheck = ["basketball", "crate", "tennisBall"];
+			for (const label of labelsToCheck) {
+				if (bodyA.label == label || bodyB.label == label) {
+					const body = bodyA.label == label ? bodyAClass : bodyBClass;
+					const volume = bodyA.label == label ? volumeA : volumeB;
+					if (volume > 0.03) {
+						const randomIndex = Math.floor(Math.random() * body?.sounds.length!);
+						const audio = new Audio((body as BodyClass).sounds[randomIndex]);
+						audio.volume = volume;
+						audio.play();
+					}
 				}
 			}
+		} catch (err) {
+			console.log(`Error handling sounds: ${err}`);
 		}
 	}
 }
