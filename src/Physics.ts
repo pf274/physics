@@ -1,11 +1,15 @@
-import Matter, { Bodies, Body, Composite, Engine, Events, Render, Runner } from "matter-js";
+import Matter, { Bodies, Body, Composite, Engine, Events, IEvent, Render, Runner, World } from "matter-js";
 import { BodyClass } from "./objects/BodyClass";
+
+const screenWidth = screen.width;
+const screenHeight = screen.height;
 
 function resizeWorld() {
 	Physics.render.canvas.width = window.innerWidth;
 	Physics.render.canvas.height = window.innerHeight;
 	Matter.Body.setPosition(Physics.rightBound, { x: window.innerWidth - 5, y: window.innerHeight / 2 });
-	Physics.bottomBound.position.y = window.innerHeight - 5;
+	Matter.Body.setPosition(Physics.bottomBound, { x: window.innerWidth / 2, y: window.innerHeight - 10 });
+	Matter.Body.setPosition(Physics.topBound, { x: window.innerWidth / 2, y: 5 });
 }
 
 export class Physics {
@@ -19,10 +23,10 @@ export class Physics {
 	private static isEventListenerAdded = false;
 	private static _isRendering = false;
 	private static _isRunning = false;
-	public static leftBound = Bodies.rectangle(5, this._height / 2, 10, this._height, { isStatic: true, render: { visible: false } });
-	public static rightBound = Bodies.rectangle(this._width - 5, this._height / 2, 10, this._height, { isStatic: true, render: { visible: false } });
-	public static bottomBound = Bodies.rectangle(this._width / 2, this._height - 5, this._width, 10, { isStatic: true, render: { visible: false } });
-	public static topBound = Bodies.rectangle(this._width / 2, 5, this._width, 10, { isStatic: true, render: { visible: false } });
+	public static leftBound = Bodies.rectangle(5, this._height / 2, 10, screenHeight, { isStatic: true, render: { visible: false } });
+	public static rightBound = Bodies.rectangle(this._width - 5, this._height / 2, 10, screenHeight, { isStatic: true, render: { visible: false } });
+	public static bottomBound = Bodies.rectangle(this._width / 2, this._height - 10, screenWidth, 20, { isStatic: true, render: { visible: true } });
+	public static topBound = Bodies.rectangle(this._width / 2, 5, screenWidth, 10, { isStatic: true, render: { visible: false } });
 	public static bodies: Record<string, BodyClass[]> = { rolyPoly: [] };
 
 	public static initialize() {
@@ -30,11 +34,10 @@ export class Physics {
 		document.body.style.overflow = "hidden";
 		this._element = document.body;
 		if (!this._engine) {
-			this._engine = Engine.create();
+			const world = World.create({ bounds: { min: { x: 0, y: 0 }, max: { x: screen.width, y: screen.height } } });
+			this._engine = Engine.create({ world });
 			Events.on(this._engine, "beforeUpdate", this.loopBodies.bind(this));
-			// Events.on(this._engine, "collisionStart", (event) => {
-			// 	console.log(event.pairs[0].bodyA.id, event.pairs[0].bodyB.id);
-			// });
+			Events.on(this._engine, "tick", this.handleTick.bind(this));
 			Composite.add(this._engine.world, [this.bottomBound, this.leftBound, this.rightBound, this.topBound]);
 		}
 		if (!this._render) {
@@ -49,7 +52,11 @@ export class Physics {
 			});
 		}
 		if (!this.isEventListenerAdded) {
-			window.addEventListener("resize", resizeWorld);
+			window.addEventListener("resize", () => {
+				resizeWorld();
+				this._width = window.innerWidth;
+				this._height = window.innerHeight;
+			});
 			this.isEventListenerAdded = true;
 		}
 		if (!this._runner) {
@@ -67,21 +74,21 @@ export class Physics {
 		const bodies = Matter.Composite.allBodies(this._engine!.world);
 		for (const body of bodies) {
 			// Adjust these values based on your world's bounds
-			const minX = 0;
-			const maxX = this._width;
-			const minY = 0;
-			const maxY = this._height;
+			const minX = 10;
+			const maxX = this._width - 10;
+			const minY = 10;
+			const maxY = this._height - 10;
 
 			// Check and update position for looping
-			if (body.position.x > maxX) {
+			if (body.position.x > this.width) {
 				Body.setPosition(body, { x: minX, y: body.position.y });
-			} else if (body.position.x < minX) {
+			} else if (body.position.x < 0) {
 				Body.setPosition(body, { x: maxX, y: body.position.y });
 			}
 
-			if (body.position.y > maxY) {
+			if (body.position.y > this.height) {
 				Body.setPosition(body, { x: body.position.x, y: minY });
-			} else if (body.position.y < minY) {
+			} else if (body.position.y < 0) {
 				Body.setPosition(body, { x: body.position.x, y: maxY });
 			}
 		}
@@ -90,6 +97,7 @@ export class Physics {
 	public static startRendering() {
 		if (this._render && !this._isRendering) {
 			Render.run(this._render);
+			Events.on(this._engine!, "collisionStart", this.handleSounds.bind(this));
 			this._isRendering = true;
 		}
 	}
@@ -160,17 +168,41 @@ export class Physics {
 		this.engine.gravity.y = yAcceleration;
 	}
 
-	public static addBodies(bodiesToAdd: { type: string; bodyInstance: BodyClass; collisionGroup?: number }[]) {
-		for (const { type, bodyInstance, collisionGroup } of bodiesToAdd) {
-			if (this.bodies[type]) {
-				this.bodies[type].push(bodyInstance);
+	public static addBodies(bodiesToAdd: { bodyInstance: BodyClass; collisionGroup?: number }[]) {
+		for (const { bodyInstance, collisionGroup } of bodiesToAdd) {
+			if (this.bodies[bodyInstance.type]) {
+				this.bodies[bodyInstance.type].push(bodyInstance);
 			} else {
-				this.bodies[type] = [bodyInstance];
+				this.bodies[bodyInstance.type] = [bodyInstance];
 			}
 			if (collisionGroup !== undefined) {
 				bodyInstance.body.collisionFilter.mask = collisionGroup;
 			}
 			Composite.add(Physics.engine.world, [bodyInstance.body]);
+		}
+	}
+
+	private static handleTick(event: IEvent<Engine>) {}
+
+	private static handleSounds(event: any) {
+		const bodyA = event.pairs[0].bodyA;
+		const bodyB = event.pairs[0].bodyB;
+		const bodyAClass = Physics.bodies[bodyA.label]?.find((body) => body.body === bodyA);
+		const bodyBClass = Physics.bodies[bodyB.label]?.find((body) => body.body === bodyB);
+		const volumeA = Math.max(0, Math.min(1, (bodyA.velocity.x + bodyA.velocity.y) / 20));
+		const volumeB = Math.max(0, Math.min(1, (bodyB.velocity.x + bodyB.velocity.y) / 20));
+		const labelsToCheck = ["basketball", "crate", "tennisBall"];
+		for (const label of labelsToCheck) {
+			if (bodyA.label == label || bodyB.label == label) {
+				const body = bodyA.label == label ? bodyAClass : bodyBClass;
+				const volume = bodyA.label == label ? volumeA : volumeB;
+				if (volume > 0.03) {
+					const randomIndex = Math.floor(Math.random() * body?.sounds.length!);
+					const audio = new Audio((body as BodyClass).sounds[randomIndex]);
+					audio.volume = volume;
+					audio.play();
+				}
+			}
 		}
 	}
 }

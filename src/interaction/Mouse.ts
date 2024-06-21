@@ -1,6 +1,6 @@
 import Matter, { Bodies, Collision, Composite } from "matter-js";
 import { Physics } from "../Physics";
-import { RolyPoly } from "../objects/RolyPoly";
+import { TennisBall } from "../objects/TennisBall";
 
 const mouseButtons = {
 	left: 0,
@@ -71,7 +71,7 @@ export class Mouse {
 	private static startMouseBodyCreateEventListener() {
 		window.addEventListener("mousedown", (event) => {
 			if (event.button == mouseButtons.right) {
-				Physics.addBodies([{ type: "rolyPoly", bodyInstance: new RolyPoly(event.clientX, event.clientY, 40) }]);
+				Physics.addBodies([{ bodyInstance: new TennisBall(event.clientX, event.clientY, 20) }]);
 			} else {
 				this.dragBody(event);
 			}
