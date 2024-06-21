@@ -1,4 +1,5 @@
 import Matter, { Bodies, Body, Composite, Engine, Events, Render, Runner } from "matter-js";
+import { BodyClass } from "./objects/BodyClass";
 
 function resizeWorld() {
 	Physics.render.canvas.width = window.innerWidth;
@@ -22,6 +23,7 @@ export class Physics {
 	public static rightBound = Bodies.rectangle(this._width - 5, this._height / 2, 10, this._height, { isStatic: true, render: { visible: false } });
 	public static bottomBound = Bodies.rectangle(this._width / 2, this._height - 5, this._width, 10, { isStatic: true, render: { visible: false } });
 	public static topBound = Bodies.rectangle(this._width / 2, 5, this._width, 10, { isStatic: true, render: { visible: false } });
+	public static bodies: Record<string, BodyClass[]> = { rolyPoly: [] };
 
 	public static initialize() {
 		document.body.style.margin = "0";
@@ -30,6 +32,9 @@ export class Physics {
 		if (!this._engine) {
 			this._engine = Engine.create();
 			Events.on(this._engine, "beforeUpdate", this.loopBodies.bind(this));
+			// Events.on(this._engine, "collisionStart", (event) => {
+			// 	console.log(event.pairs[0].bodyA.id, event.pairs[0].bodyB.id);
+			// });
 			Composite.add(this._engine.world, [this.bottomBound, this.leftBound, this.rightBound, this.topBound]);
 		}
 		if (!this._render) {
@@ -153,5 +158,19 @@ export class Physics {
 	public static setGravity(xAcceleration: number, yAcceleration: number) {
 		this.engine.gravity.x = xAcceleration;
 		this.engine.gravity.y = yAcceleration;
+	}
+
+	public static addBodies(bodiesToAdd: { type: string; bodyInstance: BodyClass; collisionGroup?: number }[]) {
+		for (const { type, bodyInstance, collisionGroup } of bodiesToAdd) {
+			if (this.bodies[type]) {
+				this.bodies[type].push(bodyInstance);
+			} else {
+				this.bodies[type] = [bodyInstance];
+			}
+			if (collisionGroup !== undefined) {
+				bodyInstance.body.collisionFilter.mask = collisionGroup;
+			}
+			Composite.add(Physics.engine.world, [bodyInstance.body]);
+		}
 	}
 }

@@ -71,7 +71,7 @@ export class Mouse {
 	private static startMouseBodyCreateEventListener() {
 		window.addEventListener("mousedown", (event) => {
 			if (event.button == mouseButtons.right) {
-				new RolyPoly(event.clientX, event.clientY, 40);
+				Physics.addBodies([{ type: "rolyPoly", bodyInstance: new RolyPoly(event.clientX, event.clientY, 40) }]);
 			} else {
 				this.dragBody(event);
 			}

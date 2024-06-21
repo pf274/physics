@@ -1,14 +1,17 @@
-import Matter, { Body, Composite } from "matter-js";
+import Matter, { Body, Composite, Events } from "matter-js";
 import { Physics } from "../Physics";
+import { BodyClass } from "./BodyClass";
 
-export class RolyPoly {
+export class RolyPoly extends BodyClass {
 	public body: Matter.Body;
 	public interval: number | null = null;
 	public startTime: number = Date.now();
+	public detector: Matter.Detector | undefined = undefined;
 	constructor(x: number, y: number, radius: number) {
+		super();
 		this.body = Matter.Bodies.circle(x, y, radius, {
 			friction: 1,
-			restitution: 0,
+			restitution: 1,
 			render: {
 				sprite: {
 					texture: "src/assets/RolyPoly.svg",
@@ -17,7 +20,6 @@ export class RolyPoly {
 				},
 			},
 		});
-		Composite.add(Physics.engine.world, this.body);
 		this.update();
 	}
 

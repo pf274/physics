@@ -9,9 +9,20 @@ Physics.initialize();
 
 const boxA = Bodies.rectangle(400, 200, 80, 80);
 const boxB = Bodies.rectangle(450, 50, 80, 80);
-const trapezoid = Bodies.polygon(400, 400, 5, 80);
+const pentagon = Bodies.polygon(400, 400, 5, 80);
 
-Composite.add(Physics.engine.world, [boxA, boxB, trapezoid]);
+// Physics.addBodies([
+// 	{
+// 		type: "box",
+// 		bodyInstance: boxA,
+// 	},
+// 	{
+// 		type: "box",
+// 		bodyInstance: boxB,
+// 	},
+// ]);
+
+Composite.add(Physics.engine.world, [boxA, boxB, pentagon]);
 
 Mouse.initialize();
 
