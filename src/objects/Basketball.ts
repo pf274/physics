@@ -12,6 +12,7 @@ export class Basketball extends BodyClass {
 		const scale = Math.min(xScale, yScale);
 		const radius = (scale * Basketball.initialWidth) / 2;
 		this.body = Matter.Bodies.circle(x, y, radius, {
+			friction: 0.5,
 			restitution: 0.995,
 			label: "basketball",
 			frictionAir: 0,

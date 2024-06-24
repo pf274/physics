@@ -1,4 +1,4 @@
-import Matter, { Bodies, Body, Events } from "matter-js";
+import Matter, { Body } from "matter-js";
 import { BodyClass } from "./BodyClass";
 
 export class SuperBouncy extends BodyClass {
