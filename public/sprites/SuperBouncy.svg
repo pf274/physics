@@ -10,7 +10,7 @@
    <stop stop-color="#fff" stop-opacity="0" offset="1"/>
   </linearGradient>
   <linearGradient id="d" x2="0" y1="506.29" y2="466.28" gradientUnits="userSpaceOnUse" xlink:href="#a"/>
-  <linearGradient id="c" x2="0" y1="469.5" y2="505.08" gradientUnits="userSpaceOnUse" xlink:href="#a"/>
+  <!-- <linearGradient id="c" x2="0" y1="469.5" y2="505.08" gradientUnits="userSpaceOnUse" xlink:href="#a"/> -->
  </defs>
  <g transform="translate(-130.29 -93.649)">
   <path transform="matrix(9.1612 0 0 9.1612 -4460.6 -4165)" d="m544.07 487.06a20.784 20.784 0 1 1 -41.567 0 20.784 20.784 0 1 1 41.567 0z" fill="url(#d)" stroke="url(#c)" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.3644"/>
