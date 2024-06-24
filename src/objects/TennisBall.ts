@@ -4,10 +4,13 @@ import { BodyClass } from "./BodyClass";
 export class TennisBall extends BodyClass {
 	public body: Matter.Body;
 	public type: string = "tennisBall";
+	public static initialWidth: number = 20;
+	public static initialHeight: number = 20;
 	public sounds: string[] = new Array(3).fill(0).map((_, i) => `sounds/tennisBall/tennisBall_${i + 1}.mp3`);
-	constructor(x: number, y: number, scale: number) {
+	constructor(x: number, y: number, xScale: number, yScale: number) {
 		super();
-		const radius = scale * 10;
+		const scale = Math.min(xScale, yScale);
+		const radius = (scale * TennisBall.initialWidth) / 2;
 		this.body = Matter.Bodies.circle(x, y, radius, {
 			friction: 0.5,
 			restitution: 0.6,

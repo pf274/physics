@@ -4,6 +4,7 @@ import { TennisBall } from "../objects/TennisBall";
 import { Basketball } from "../objects/Basketball";
 import { Crate } from "../objects/Crate";
 import { BodyClass } from "../objects/BodyClass";
+import { SuperBouncy } from "../objects/SuperBouncy";
 
 const mouseButtons = {
 	left: 0,
@@ -15,15 +16,19 @@ const objectClasses: { [key: string]: new (...args: any[]) => BodyClass } = {
 	Basketball,
 	TennisBall,
 	Crate,
+	SuperBouncy,
 };
 
 export class Mouse {
 	private static mouseBody: Matter.Body | undefined = undefined;
-	private static isEventListenerAdded: boolean = false;
+	private static eventListenersAdded: boolean = false;
 	private static constraint: Matter.Constraint | undefined = undefined;
-	private static SelectedObject: (typeof objectClasses)[keyof typeof objectClasses] = objectClasses.Crate;
-	private static xScale: number = 1;
-	private static yScale: number = 1;
+	public static SelectedObject: (typeof objectClasses)[keyof typeof objectClasses] = objectClasses.Crate;
+	public static xScale: number = 1;
+	public static yScale: number = 1;
+	public static x: number = 0;
+	public static y: number = 0;
+	private static keyStates: { [key: string]: boolean } = {};
 
 	private static dragBody(event: MouseEvent) {
 		const body = this.touchingBody(event.clientX, event.clientY);
@@ -80,6 +85,25 @@ export class Mouse {
 		});
 	}
 
+	private static startScaleEventListener() {
+		window.addEventListener("keydown", (event) => {
+			// Mark the key as pressed
+			this.keyStates[event.key] = true;
+		});
+
+		window.addEventListener("keyup", (event) => {
+			// Mark the key as not pressed
+			this.keyStates[event.key] = false;
+		});
+	}
+
+	public static updateScale() {
+		const xScaleChange = this.keyStates.a ? -0.1 : this.keyStates.d ? 0.1 : 0;
+		const yScaleChange = this.keyStates.s ? -0.1 : this.keyStates.w ? 0.1 : 0;
+		this.xScale = Math.max(0.1, this.xScale + xScaleChange);
+		this.yScale = Math.max(0.1, this.yScale + yScaleChange);
+	}
+
 	private static startMouseBodyCreateEventListener() {
 		window.addEventListener("mousedown", (event) => {
 			if (event.button == mouseButtons.right) {
@@ -105,11 +129,12 @@ export class Mouse {
 	}
 
 	public static initialize() {
-		if (!this.isEventListenerAdded) {
+		if (!this.eventListenersAdded) {
 			this.startMouseBodyCreateEventListener();
 			this.startDragEventListener();
+			this.startScaleEventListener();
 			this.startMouseBodyRemoveEventListener();
-			this.isEventListenerAdded = true;
+			this.eventListenersAdded = true;
 		}
 	}
 
@@ -132,5 +157,27 @@ export class Mouse {
 			}
 		}
 		this.SelectedObject = objectClass;
+		this.xScale = 1;
+		this.yScale = 1;
 	}
 }
+
+document.addEventListener("mousemove", (event) => {
+	Mouse.x = event.clientX;
+	Mouse.y = event.clientY;
+});
+
+const mousePreview = document.getElementById("mousePreview") as HTMLDivElement;
+
+function preview() {
+	const width = Mouse.xScale * (Mouse.SelectedObject as any).initialWidth;
+	const height = Mouse.yScale * (Mouse.SelectedObject as any).initialHeight;
+	mousePreview.style.width = `${width}px`;
+	mousePreview.style.height = `${height}px`;
+	mousePreview.style.left = `${Mouse.x - width / 2}px`;
+	mousePreview.style.top = `${Mouse.y - height / 2}px`;
+	Mouse.updateScale();
+	window.requestAnimationFrame(preview);
+}
+
+window.requestAnimationFrame(preview);

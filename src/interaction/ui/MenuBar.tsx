@@ -35,6 +35,7 @@ export function MenuBar() {
 				<MenuItem onClick={() => handleSelectItem("Basketball")}>Basketball</MenuItem>
 				<MenuItem onClick={() => handleSelectItem("Crate")}>Crate</MenuItem>
 				<MenuItem onClick={() => handleSelectItem("Tennisball")}>Tennis Ball</MenuItem>
+				<MenuItem onClick={() => handleSelectItem("SuperBouncy")}>Super Bouncy Ball</MenuItem>
 			</Menu>
 		</div>
 	);

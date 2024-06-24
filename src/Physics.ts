@@ -219,16 +219,16 @@ export class Physics {
 			const bodyBClass = Physics.bodies[bodyB.label]?.find((body) => body.body === bodyB);
 			const volumeA = Math.max(0, Math.min(1, (bodyA.velocity.x + bodyA.velocity.y) / 20));
 			const volumeB = Math.max(0, Math.min(1, (bodyB.velocity.x + bodyB.velocity.y) / 20));
-			const labelsToCheck = ["basketball", "crate", "tennisBall"];
+			const labelsToCheck = ["basketball", "crate", "tennisBall", "superBouncy"];
 			for (const label of labelsToCheck) {
 				if (bodyA.label == label || bodyB.label == label) {
-					const body = bodyA.label == label ? bodyAClass : bodyBClass;
+					const body = bodyA.label == label ? bodyAClass! : bodyBClass!;
 					const volume = bodyA.label == label ? volumeA : volumeB;
 					if (volume > 0.03) {
 						const randomIndex = Math.floor(Math.random() * body?.sounds.length!);
 						const audio = new Audio((body as BodyClass).sounds[randomIndex]);
-						audio.volume = volume;
-						audio.playbackRate = 1 + Math.random() * 0.2 - 0.1;
+						audio.volume = volume * body.volume;
+						audio.playbackRate = 1 + Math.random() * 0.4 - 0.2;
 						audio.play();
 					}
 				}

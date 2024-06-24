@@ -4,10 +4,13 @@ import { BodyClass } from "./BodyClass";
 export class Basketball extends BodyClass {
 	public body: Matter.Body;
 	public type: string = "basketball";
+	public static initialWidth: number = 60;
+	public static initialHeight: number = 60;
 	public sounds: string[] = new Array(7).fill(0).map((_, i) => `sounds/basketball/basketball_${i + 1}.mp3`);
-	constructor(x: number, y: number, scale: number) {
+	constructor(x: number, y: number, xScale: number, yScale: number) {
 		super();
-		const radius = scale * 30;
+		const scale = Math.min(xScale, yScale);
+		const radius = (scale * Basketball.initialWidth) / 2;
 		this.body = Matter.Bodies.circle(x, y, radius, {
 			restitution: 0.995,
 			label: "basketball",
