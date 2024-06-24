@@ -4,7 +4,7 @@ import { BodyClass } from "./BodyClass";
 export class TennisBall extends BodyClass {
 	public body: Matter.Body;
 	public type: string = "tennisBall";
-	public sounds: string[] = new Array(3).fill(0).map((_, i) => `physics/sounds/tennisBall/tennisBall_${i + 1}.mp3`);
+	public sounds: string[] = new Array(3).fill(0).map((_, i) => `sounds/tennisBall/tennisBall_${i + 1}.mp3`);
 	constructor(x: number, y: number, scale: number) {
 		super();
 		const radius = scale * 10;
@@ -15,7 +15,7 @@ export class TennisBall extends BodyClass {
 			frictionAir: 0,
 			render: {
 				sprite: {
-					texture: "physics/sprites/TennisBall.png",
+					texture: "sprites/TennisBall.png",
 					xScale: (radius * 2) / 2200,
 					yScale: (radius * 2) / 2200,
 				},

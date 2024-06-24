@@ -3,9 +3,10 @@
 	"private": true,
 	"version": "0.0.0",
 	"type": "module",
+	"homepage": "https://pf274.github.io/physics/",
 	"scripts": {
 		"start": "vite",
-		"build": "tsc && vite build",
+		"build": "tsc && vite build --base=/physics/",
 		"preview": "vite preview",
 		"deploy": "gh-pages -d dist",
 		"predeploy": "npm run build"

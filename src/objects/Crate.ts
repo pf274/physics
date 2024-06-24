@@ -4,7 +4,7 @@ import { BodyClass } from "./BodyClass";
 export class Crate extends BodyClass {
 	public body: Matter.Body;
 	public type: string = "crate";
-	public sounds: string[] = new Array(3).fill(0).map((_, i) => `physics/sounds/crate/crate_${i + 1}.mp3`);
+	public sounds: string[] = new Array(3).fill(0).map((_, i) => `sounds/crate/crate_${i + 1}.mp3`);
 	constructor(x: number, y: number, xScale: number, yScale: number) {
 		super();
 		const width = xScale * 80;
@@ -15,7 +15,7 @@ export class Crate extends BodyClass {
 			label: "crate",
 			render: {
 				sprite: {
-					texture: "physics/sprites/Crate.svg",
+					texture: "sprites/Crate.svg",
 					xScale: width / 150,
 					yScale: height / 150,
 				},
