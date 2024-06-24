@@ -1,4 +1,4 @@
-import Matter, { Bodies, Body, Composite, Engine, Events, IEvent, Render, Runner, World } from "matter-js";
+import Matter, { Bodies, Body, Composite, Engine, Events, Render, Runner, World } from "matter-js";
 import { BodyClass } from "./objects/BodyClass";
 
 const screenWidth = screen.width;
@@ -12,6 +12,14 @@ function resizeWorld() {
 	Matter.Body.setPosition(Physics.topBound, { x: window.innerWidth / 2, y: 5 });
 }
 
+const borderProps = {
+	isStatic: true,
+	render: {
+		// visible: true,
+		fillStyle: "#0a0b10",
+	},
+};
+
 export class Physics {
 	private static _engine: Matter.Engine | null = null;
 	private static _render: Matter.Render | null = null;
@@ -23,21 +31,26 @@ export class Physics {
 	private static isEventListenerAdded = false;
 	private static _isRendering = false;
 	private static _isRunning = false;
-	public static leftBound = Bodies.rectangle(5, this._height / 2, 10, Math.max(screenWidth, screenHeight), { isStatic: true, render: { visible: false } });
-	public static rightBound = Bodies.rectangle(this._width - 5, this._height / 2, 10, Math.max(screenWidth, screenHeight), { isStatic: true, render: { visible: false } });
-	public static bottomBound = Bodies.rectangle(this._width / 2, this._height - 10, Math.max(screenWidth, screenHeight), 20, { isStatic: true, render: { visible: true } });
-	public static topBound = Bodies.rectangle(this._width / 2, 5, Math.max(screenWidth, screenHeight), 10, { isStatic: true, render: { visible: false } });
+	public static leftBound = Bodies.rectangle(5, this._height / 2, 20, Math.max(screenWidth, screenHeight), borderProps);
+	public static rightBound = Bodies.rectangle(this._width - 5, this._height / 2, 20, Math.max(screenWidth, screenHeight), borderProps);
+	public static bottomBound = Bodies.rectangle(this._width / 2, this._height - 10, Math.max(screenWidth, screenHeight), 20, borderProps);
+	public static topBound = Bodies.rectangle(this._width / 2, 5, Math.max(screenWidth, screenHeight), 20, borderProps);
 	public static bodies: Record<string, BodyClass[]> = { rolyPoly: [] };
 
 	public static initialize() {
 		document.body.style.margin = "0";
 		document.body.style.overflow = "hidden";
-		this._element = document.body;
+		this._element = document.getElementById("physicsWorld")!;
+		// this._element.style.position = "absolute";
+		// this._element.style.left = "0";
+		// this._element.style.top = "0";
+		// this._element.style.right = "0";
+		// this._element.style.bottom = "0";
 		if (!this._engine) {
 			const world = World.create({ bounds: { min: { x: 0, y: 0 }, max: { x: screen.width, y: screen.height } } });
 			this._engine = Engine.create({ world });
 			Events.on(this._engine, "beforeUpdate", this.loopBodies.bind(this));
-			Events.on(this._engine, "tick", this.handleTick.bind(this));
+			// Events.on(this._engine, "tick", this.handleTick.bind(this));
 			Composite.add(this._engine.world, [this.bottomBound, this.leftBound, this.rightBound, this.topBound]);
 		}
 		if (!this._render) {
@@ -83,18 +96,27 @@ export class Physics {
 			const maxX = this._width - 10;
 			const minY = 10;
 			const maxY = this._height - 10;
+			let looped = false;
 
 			// Check and update position for looping
 			if (body.position.x > this.width) {
 				Body.setPosition(body, { x: minX, y: body.position.y });
+				looped = true;
 			} else if (body.position.x < 0) {
 				Body.setPosition(body, { x: maxX, y: body.position.y });
+				looped = true;
 			}
 
 			if (body.position.y > this.height) {
 				Body.setPosition(body, { x: body.position.x, y: minY });
+				looped = true;
 			} else if (body.position.y < 0) {
 				Body.setPosition(body, { x: body.position.x, y: maxY });
+				looped = true;
+			}
+			if (looped) {
+				body.velocity.x = 0;
+				body.velocity.y = 0;
 			}
 		}
 	}
@@ -187,7 +209,7 @@ export class Physics {
 		}
 	}
 
-	private static handleTick(event: IEvent<Engine>) {}
+	// private static handleTick(event: IEvent<Engine>) {}
 
 	private static handleSounds(event: any) {
 		try {
@@ -206,6 +228,7 @@ export class Physics {
 						const randomIndex = Math.floor(Math.random() * body?.sounds.length!);
 						const audio = new Audio((body as BodyClass).sounds[randomIndex]);
 						audio.volume = volume;
+						audio.playbackRate = 1 + Math.random() * 0.2 - 0.1;
 						audio.play();
 					}
 				}

@@ -1,6 +1,9 @@
 import Matter, { Bodies, Collision, Composite } from "matter-js";
 import { Physics } from "../Physics";
 import { TennisBall } from "../objects/TennisBall";
+import { Basketball } from "../objects/Basketball";
+import { Crate } from "../objects/Crate";
+import { BodyClass } from "../objects/BodyClass";
 
 const mouseButtons = {
 	left: 0,
@@ -8,10 +11,19 @@ const mouseButtons = {
 	right: 2,
 };
 
+const objectClasses: { [key: string]: new (...args: any[]) => BodyClass } = {
+	Basketball,
+	TennisBall,
+	Crate,
+};
+
 export class Mouse {
 	private static mouseBody: Matter.Body | undefined = undefined;
 	private static isEventListenerAdded: boolean = false;
 	private static constraint: Matter.Constraint | undefined = undefined;
+	private static SelectedObject: (typeof objectClasses)[keyof typeof objectClasses] = objectClasses.Crate;
+	private static xScale: number = 1;
+	private static yScale: number = 1;
 
 	private static dragBody(event: MouseEvent) {
 		const body = this.touchingBody(event.clientX, event.clientY);
@@ -71,7 +83,8 @@ export class Mouse {
 	private static startMouseBodyCreateEventListener() {
 		window.addEventListener("mousedown", (event) => {
 			if (event.button == mouseButtons.right) {
-				Physics.addBodies([{ bodyInstance: new TennisBall(event.clientX, event.clientY, 20) }]);
+				const newBodyInstance = new this.SelectedObject(event.clientX, event.clientY, this.xScale, this.yScale);
+				Physics.addBodies([{ bodyInstance: newBodyInstance }]);
 			} else {
 				this.dragBody(event);
 			}
@@ -104,5 +117,20 @@ export class Mouse {
 		return Physics.engine.world.bodies.find((body) => {
 			return Collision.collides(body, Bodies.rectangle(x, y, 1, 1))?.collided;
 		});
+	}
+
+	public static selectObject(object: string) {
+		let objectClass = objectClasses[object];
+		if (!objectClass) {
+			const objectNames = Object.keys(objectClasses);
+			const name = objectNames.find((name) => name.toLowerCase().includes(object.toLowerCase()));
+			if (name) {
+				objectClass = objectClasses[name];
+			} else {
+				console.log(`Object with name '${object}' not found`);
+				return;
+			}
+		}
+		this.SelectedObject = objectClass;
 	}
 }

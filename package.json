@@ -1,15 +1,20 @@
 {
-	"name": "test-game",
+	"name": "physics",
 	"private": true,
 	"version": "0.0.0",
 	"type": "module",
 	"scripts": {
 		"start": "vite",
 		"build": "tsc && vite build",
-		"preview": "vite preview"
+		"preview": "vite preview",
+		"deploy": "gh-pages -d dist",
+		"predeploy": "npm run build"
 	},
 	"devDependencies": {
 		"@types/matter-js": "^0.19.6",
+		"@types/react": "^18.3.3",
+		"@types/react-dom": "^18.3.0",
+		"gh-pages": "^6.1.1",
 		"typescript": "^5.2.2",
 		"vite": "^5.2.0"
 	},
@@ -19,6 +24,12 @@
 	"license": "ISC",
 	"description": "",
 	"dependencies": {
-		"matter-js": "^0.19.0"
+		"@emotion/react": "^11.11.4",
+		"@emotion/styled": "^11.11.5",
+		"@mui/material": "^5.15.20",
+		"@vitejs/plugin-react": "^4.3.1",
+		"matter-js": "^0.19.0",
+		"react": "^18.3.1",
+		"react-dom": "^18.3.1"
 	}
 }

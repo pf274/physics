@@ -1,12 +1,13 @@
-import Matter, { Body } from "matter-js";
+import Matter from "matter-js";
 import { BodyClass } from "./BodyClass";
 
 export class TennisBall extends BodyClass {
 	public body: Matter.Body;
 	public type: string = "tennisBall";
-	public sounds: string[] = new Array(3).fill(0).map((_, i) => `src/assets/sounds/tennisBall/tennisBall_${i + 1}.mp3`);
-	constructor(x: number, y: number, radius: number) {
+	public sounds: string[] = new Array(3).fill(0).map((_, i) => `physics/sounds/tennisBall/tennisBall_${i + 1}.mp3`);
+	constructor(x: number, y: number, scale: number) {
 		super();
+		const radius = scale * 10;
 		this.body = Matter.Bodies.circle(x, y, radius, {
 			friction: 0.5,
 			restitution: 0.6,
@@ -14,7 +15,7 @@ export class TennisBall extends BodyClass {
 			frictionAir: 0,
 			render: {
 				sprite: {
-					texture: "src/assets/sprites/TennisBall.png",
+					texture: "physics/sprites/TennisBall.png",
 					xScale: (radius * 2) / 2200,
 					yScale: (radius * 2) / 2200,
 				},
